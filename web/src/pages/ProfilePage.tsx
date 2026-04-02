@@ -64,8 +64,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input className="input" value={user?.email || ''} disabled
-                className="input bg-gray-50 text-gray-500 cursor-not-allowed" />
+              <input className="input bg-gray-50 text-gray-500 cursor-not-allowed" value={user?.email || ''} disabled />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>

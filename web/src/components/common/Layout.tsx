@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../utils/store';
+import { useAuthStore } from '../../utils/store';
 
 interface LayoutProps {
   children: React.ReactNode;
