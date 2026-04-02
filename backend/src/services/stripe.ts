@@ -4,8 +4,12 @@ import { logger } from '../utils/logger';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2024-06-20' });
 
 export const stripeService = {
-  async createCheckoutSession(userId: string, email: string, existingCustomerId?: string) {
+  async createCheckoutSession(userId: string, email: string, existingCustomerId?: string, plan: 'monthly' | 'annual' = 'monthly') {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    const priceId = plan === 'annual'
+      ? process.env.STRIPE_PRICE_ID_ANNUAL
+      : process.env.STRIPE_PRICE_ID_MONTHLY;
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -14,7 +18,7 @@ export const stripeService = {
       customer_email: existingCustomerId ? undefined : email,
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID_MONTHLY,
+          price: priceId,
           quantity: 1,
         },
       ],

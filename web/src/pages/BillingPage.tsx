@@ -24,6 +24,7 @@ export default function BillingPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
 
   useEffect(() => {
     Promise.all([
@@ -35,7 +36,7 @@ export default function BillingPage() {
   const handleSubscribe = async () => {
     setCheckoutLoading(true);
     try {
-      const { data } = await subscriptionApi.checkout();
+      const { data } = await subscriptionApi.checkout(selectedPlan);
       window.location.href = data.checkoutUrl;
     } catch {
       toast.error('Failed to start checkout');
@@ -74,7 +75,7 @@ export default function BillingPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Plan</p>
-                <p className="font-medium text-gray-900">SafeSite Pro – $49/month</p>
+                <p className="font-medium text-gray-900">SafeSite Pro</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Documents This Month</p>
@@ -98,14 +99,65 @@ export default function BillingPage() {
           </div>
         </div>
 
+        {/* Plan selector (shown when not yet active) */}
+        {(!subscription?.status || subscription.status === 'TRIALING' || subscription.status === 'CANCELED') && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Choose Your Plan</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <button
+                onClick={() => setSelectedPlan('monthly')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                  selectedPlan === 'monthly'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setSelectedPlan('annual')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                  selectedPlan === 'annual'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                }`}
+              >
+                Annual
+                <span className="ml-1.5 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
+                  Save 33%
+                </span>
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <PricingCard
+                title="Monthly"
+                price="$49"
+                period="/month"
+                description="Billed monthly. Cancel anytime."
+                selected={selectedPlan === 'monthly'}
+                onSelect={() => setSelectedPlan('monthly')}
+              />
+              <PricingCard
+                title="Annual"
+                price="$399"
+                period="/year"
+                description="Billed once a year. That's $33.25/mo — save $189."
+                selected={selectedPlan === 'annual'}
+                onSelect={() => setSelectedPlan('annual')}
+                badge="Best Value"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Pricing info */}
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Pricing Details</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">What's Included</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <PricingItem
-              title="Base Plan"
-              price="$49/month"
-              description="Includes 15 documents per billing cycle"
+              title="15 Documents / month"
+              price="Included"
+              description="AI analysis, OCR, and risk scoring on every document"
             />
             <PricingItem
               title="Extra Documents"
@@ -173,6 +225,33 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
       {status}
     </span>
+  );
+}
+
+function PricingCard({
+  title, price, period, description, selected, onSelect, badge,
+}: {
+  title: string; price: string; period: string; description: string;
+  selected: boolean; onSelect: () => void; badge?: string;
+}) {
+  return (
+    <div
+      onClick={onSelect}
+      className={`relative rounded-lg p-5 border-2 cursor-pointer transition-colors ${
+        selected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 bg-white hover:border-blue-300'
+      }`}
+    >
+      {badge && (
+        <span className="absolute top-3 right-3 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+          {badge}
+        </span>
+      )}
+      <p className="text-sm font-semibold text-gray-700">{title}</p>
+      <p className="text-2xl font-bold text-gray-900 mt-1">
+        {price}<span className="text-sm font-normal text-gray-500">{period}</span>
+      </p>
+      <p className="text-xs text-gray-500 mt-1">{description}</p>
+    </div>
   );
 }
 
