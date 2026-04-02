@@ -3,9 +3,11 @@
   "testEnvironment": "node",
   "testMatch": ["**/tests/**/*.test.ts"],
   "collectCoverageFrom": ["src/**/*.ts"],
+  "setupFiles": ["./tests/setup.ts"],
   "globals": {
     "ts-jest": {
-      "tsconfig": "tsconfig.json"
+      "tsconfig": "tsconfig.json",
+      "diagnostics": false
     }
   }
 }
