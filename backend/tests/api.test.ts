@@ -1,4 +1,20 @@
 import request from 'supertest';
+
+jest.mock('../src/models/prisma', () => ({
+  prisma: {
+    user: { findUnique: jest.fn(), findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
+    document: { findMany: jest.fn(), findFirst: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
+    analysis: { create: jest.fn(), deleteMany: jest.fn() },
+    auditLog: { create: jest.fn() },
+    payment: { findMany: jest.fn(), create: jest.fn() },
+    notarization: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
+  },
+}));
+
+jest.mock('../src/utils/logger', () => ({
+  logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), http: jest.fn() },
+}));
+
 import app from '../src/app';
 
 describe('Health Check', () => {
