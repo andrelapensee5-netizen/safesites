@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/common/Layout';
 import { documentsApi, analysisApi, notarizationApi } from '../services/api';
@@ -31,7 +31,7 @@ export default function DocumentDetailPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'analysis' | 'redlines'>('overview');
   const navigate = useNavigate();
 
-  const loadDocument = async () => {
+  const loadDocument = useCallback(async () => {
     try {
       const { data } = await documentsApi.get(id!);
       setDocument(data.document);
@@ -41,9 +41,9 @@ export default function DocumentDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
-  useEffect(() => { loadDocument(); }, [id]);
+  useEffect(() => { loadDocument(); }, [loadDocument]);
 
   const handleDownload = async () => {
     try {

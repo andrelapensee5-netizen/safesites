@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '../models/prisma';
 import { emailService } from '../services/email';
@@ -139,13 +139,13 @@ authRouter.post(
       const accessToken = jwt.sign(
         { userId: user.id, role: user.role },
         jwtSecret,
-        { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },
+        { expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as SignOptions['expiresIn'] },
       );
 
       const refreshToken = jwt.sign(
         { userId: user.id },
         refreshSecret,
-        { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' },
+        { expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as SignOptions['expiresIn'] },
       );
 
       await prisma.auditLog.create({
@@ -241,7 +241,7 @@ authRouter.post('/refresh', async (req: Request, res: Response, next: NextFuncti
     const accessToken = jwt.sign(
       { userId: user.id, role: user.role },
       jwtSecret,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' },
+      { expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as SignOptions['expiresIn'] },
     );
 
     res.json({ accessToken });

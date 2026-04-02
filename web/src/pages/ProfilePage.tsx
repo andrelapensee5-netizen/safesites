@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/common/Layout';
 import { usersApi } from '../services/api';
 import { useAuthStore } from '../utils/store';
@@ -64,7 +64,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input className="input" value={user?.email || ''} disabled
+              <input value={user?.email || ''} disabled
                 className="input bg-gray-50 text-gray-500 cursor-not-allowed" />
             </div>
             <div>
