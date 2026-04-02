@@ -1,0 +1,24 @@
+{
+  "name": "safesites-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SafeSite AI-Powered Document Review Platform",
+  "workspaces": [
+    "backend",
+    "web",
+    "mobile",
+    "desktop"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=web\"",
+    "build": "npm run build --workspace=backend && npm run build --workspace=web",
+    "test": "npm run test --workspace=backend && npm run test --workspace=web",
+    "lint": "npm run lint --workspace=backend && npm run lint --workspace=web",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

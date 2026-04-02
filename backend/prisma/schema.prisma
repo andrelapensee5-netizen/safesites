@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CONSUMER
+  LAWYER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  ANALYZED
+  NOTARIZED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  email              String              @unique
+  passwordHash       String
+  firstName          String
+  lastName           String
+  role               UserRole            @default(CONSUMER)
+  emailVerified      Boolean             @default(false)
+  emailVerifyToken   String?
+  resetToken         String?
+  resetTokenExpiry   DateTime?
+  subscriptionId     String?
+  subscriptionStatus SubscriptionStatus?
+  stripeCustomerId   String?             @unique
+  trialEndsAt        DateTime?
+  documentsThisMonth Int                 @default(0)
+  billingCycleStart  DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  documents          Document[]
+  payments           Payment[]
+  auditLogs          AuditLog[]
+
+  @@map("users")
+}
+
+model Document {
+  id           String         @id @default(uuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName     String
+  originalName String
+  mimeType     String
+  fileSize     Int
+  s3Key        String
+  s3Url        String?
+  status       DocumentStatus @default(PENDING)
+  ocrText      String?
+  pageCount    Int?
+  version      Int            @default(1)
+  parentId     String?
+  parent       Document?      @relation("DocumentVersions", fields: [parentId], references: [id])
+  versions     Document[]     @relation("DocumentVersions")
+  analysis     Analysis?
+  notarization Notarization?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("documents")
+}
+
+model Analysis {
+  id             String   @id @default(uuid())
+  documentId     String   @unique
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  summary        String?  @db.Text
+  riskScore      Int?
+  risks          Json?
+  clauses        Json?
+  suggestions    Json?
+  redlines       Json?
+  rawResponse    Json?
+  processingTime Int?
+  model          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("analyses")
+}
+
+model Notarization {
+  id             String   @id @default(uuid())
+  documentId     String   @unique
+  document       Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  notarizeJobId  String?
+  status         String   @default("pending")
+  scheduledAt    DateTime?
+  completedAt    DateTime?
+  notaryName     String?
+  certNumber     String?
+  notarizedS3Key String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("notarizations")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripePaymentId String?       @unique
+  stripeInvoiceId String?
+  amount          Int
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  description     String?
+  metadata        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  resource   String?
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}

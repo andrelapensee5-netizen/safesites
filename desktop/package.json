@@ -1,0 +1,47 @@
+{
+  "name": "safesites-desktop",
+  "version": "1.0.0",
+  "description": "SafeSite Desktop Application",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "concurrently \"tsc --watch\" \"wait-on dist/main.js && electron .\"",
+    "build": "tsc && electron-builder",
+    "pack": "electron-builder --dir",
+    "start": "tsc && electron ."
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "concurrently": "^8.2.2",
+    "electron": "^29.1.4",
+    "electron-builder": "^24.13.3",
+    "typescript": "^5.4.3",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.safesites.desktop",
+    "productName": "SafeSite",
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "assets/icon.icns"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "andrelapensee5-netizen",
+      "repo": "safesites"
+    }
+  }
+}
