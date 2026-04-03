@@ -35,15 +35,20 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: ECR_REGISTRY
           script: |
+            set -euo pipefail
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
             cd /opt/safesites
-            docker pull ${{ steps.login-ecr.outputs.registry }}/safesites-backend:latest
+            docker pull $ECR_REGISTRY/safesites-backend:latest
             docker-compose up -d backend
-            docker-compose exec backend npx prisma migrate deploy
+            docker-compose exec -T backend npx prisma migrate deploy
 
   deploy-frontend:
     runs-on: ubuntu-latest
