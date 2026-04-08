@@ -49,10 +49,13 @@ subscriptionRouter.post('/checkout', authenticate, async (req: AuthRequest, res:
     const user = await prisma.user.findUnique({ where: { id: req.userId! } });
     if (!user) throw createError('User not found', 404);
 
+    const plan: 'monthly' | 'annual' = req.body.plan === 'annual' ? 'annual' : 'monthly';
+
     const session = await stripeService.createCheckoutSession(
       user.id,
       user.email,
       user.stripeCustomerId || undefined,
+      plan,
     );
 
     res.json({ checkoutUrl: session.url, sessionId: session.id });

@@ -77,7 +77,7 @@ export const analysisApi = {
 // Subscriptions
 export const subscriptionApi = {
   status: () => api.get('/subscriptions/status'),
-  checkout: () => api.post('/subscriptions/checkout'),
+  checkout: (plan: 'monthly' | 'annual' = 'monthly') => api.post('/subscriptions/checkout', { plan }),
   portal: () => api.post('/subscriptions/portal'),
   invoices: () => api.get('/subscriptions/invoices'),
 };
